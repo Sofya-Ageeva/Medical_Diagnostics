@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ service.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'services:list' %}">Услуги</a></li>
+            <li class="breadcrumb-item active">{{ service.name }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ service.name }}</h1>
+            <p class="lead">{{ service.short_description }}</p>
+            <div>{{ service.full_description|linebreaks }}</div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ service.price }} ₽</h3>
+                    <p>Длительность: {{ service.duration }} мин.</p>
+                    <a href="{% url 'appointments:create' %}" class="btn btn-primary w-100">
+                        Записаться
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

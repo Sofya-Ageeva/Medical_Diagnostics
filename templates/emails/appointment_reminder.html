@@ -1,0 +1,22 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Напоминание о приёме{% endblock %}
+
+{% block content %}
+<h2>Здравствуйте, {{ appointment.user.get_full_name|default:appointment.user.username }}!</h2>
+
+<p>🔔 Напоминаем, что <strong>завтра</strong> у вас приём.</p>
+
+<div class="info-block">
+    <p><strong>📅 Дата:</strong> {{ appointment.date|date:"d.m.Y" }}</p>
+    <p><strong>🕐 Время:</strong> {{ appointment.time|time:"H:i" }}</p>
+    <p><strong>👨‍⚕️ Врач:</strong> {{ appointment.doctor.full_name }}</p>
+    <p><strong>🏥 Адрес:</strong> г. Санкт-Петербург, ул. Медиков, д. 1</p>
+</div>
+
+<p>Пожалуйста, не забудьте взять с собой документы.</p>
+
+<a href="http://127.0.0.1:8000/appointments/" class="btn">Мои записи</a>
+
+<p>С уважением,<br>Команда МедДиагностика</p>
+{% endblock %}

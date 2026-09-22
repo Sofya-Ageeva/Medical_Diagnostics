@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1>Мой профиль</h1>
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{% url 'appointments:my' %}" class="btn btn-secondary">Мои записи</a>
+    </form>
+</div>
+{% endblock %}

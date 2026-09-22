@@ -1,0 +1,32 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Запись на приём создана{% endblock %}
+
+{% block content %}
+<h2>Здравствуйте, {{ appointment.user.get_full_name|default:appointment.user.username }}!</h2>
+
+<p>Ваша запись на приём успешно создана.</p>
+
+<div class="info-block">
+    <p><strong>📅 Дата:</strong> {{ appointment.date|date:"d.m.Y" }}</p>
+    <p><strong>🕐 Время:</strong> {{ appointment.time|time:"H:i" }}</p>
+    <p><strong>👨‍⚕️ Врач:</strong> {{ appointment.doctor.full_name }}</p>
+    <p><strong>🏥 Специализация:</strong> {{ appointment.doctor.specialization.name }}</p>
+    {% if appointment.service %}
+        <p><strong>💊 Услуга:</strong> {{ appointment.service.name }}</p>
+        <p><strong>💰 Стоимость:</strong> {{ appointment.service.price }} ₽</p>
+    {% endif %}
+</div>
+
+<p>Пожалуйста, приходите за 10-15 минут до назначенного времени.</p>
+
+{% if appointment.comment %}
+    <p><strong>Ваш комментарий:</strong> {{ appointment.comment }}</p>
+{% endif %}
+
+<p>Если вы не можете быть на приеме, отменить запись возможно в личном кабинете.</p>
+
+<a href="http://127.0.0.1:8000/appointments/" class="btn">Мои записи</a>
+
+<p>С уважением,<br>Команда МедДиагностика</p>
+{% endblock %}

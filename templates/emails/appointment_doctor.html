@@ -1,0 +1,33 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Новая запись на приём{% endblock %}
+
+{% block content %}
+<h2>Здравствуйте, {{ appointment.doctor.full_name }}!</h2>
+
+<p>У вас новая запись на приём.</p>
+
+<div class="info-block">
+    <p><strong>👤 Пациент:</strong> {{ appointment.user.get_full_name|default:appointment.user.username }}</p>
+    <p><strong>📧 Email:</strong> {{ appointment.user.email }}</p>
+    {% if appointment.user.phone %}
+        <p><strong>📱 Телефон:</strong> {{ appointment.user.phone }}</p>
+    {% endif %}
+    <p><strong>📅 Дата:</strong> {{ appointment.date|date:"d.m.Y" }}</p>
+    <p><strong>🕐 Время:</strong> {{ appointment.time|time:"H:i" }}</p>
+    {% if appointment.service %}
+        <p><strong>💊 Услуга:</strong> {{ appointment.service.name }}</p>
+    {% endif %}
+</div>
+
+{% if appointment.comment %}
+    <p><strong>Комментарий пациента:</strong></p>
+    <p>{{ appointment.comment }}</p>
+{% endif %}
+
+<p>Пожалуйста, подтвердите или отклоните запись.</p>
+
+<a href="http://127.0.0.1:8000/admin/appointments/appointment/" class="btn">Открыть админку</a>
+
+<p>С уважением,<br>Команда МедДиагностика</p>
+{% endblock %}

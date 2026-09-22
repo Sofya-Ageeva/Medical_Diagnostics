@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Услуги{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Наши услуги</h1>
+
+    <!-- Поиск и фильтры -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <!-- Поиск -->
+                <div class="col-md-4">
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Поиск услуг..."
+                           value="{{ current_filters.search }}">
+                </div>
+
+                <!-- Фильтр по цене -->
+                <div class="col-md-2">
+                    <input type="number"
+                           name="min_price"
+                           class="form-control"
+                           placeholder="Цена от"
+                           value="{{ current_filters.min_price }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="number"
+                           name="max_price"
+                           class="form-control"
+                           placeholder="Цена до"
+                           value="{{ current_filters.max_price }}">
+                </div>
+
+                <!-- Сортировка -->
+                <div class="col-md-2">
+                    <select name="sort" class="form-select">
+                        <option value="">Сортировка</option>
+                        <option value="price_asc" {% if current_filters.sort == 'price_asc' %}selected{% endif %}>
+                            Цена ↑
+                        </option>
+                        <option value="price_desc" {% if current_filters.sort == 'price_desc' %}selected{% endif %}>
+                            Цена ↓
+                        </option>
+                        <option value="name" {% if current_filters.sort == 'name' %}selected{% endif %}>
+                            По названию
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Найти
+                    </button>
+                </div>
+            </form>
+
+            <!-- Активные фильтры -->
+            {% if current_filters.search or current_filters.min_price or current_filters.max_price %}
+                <div class="mt-3">
+                    <span class="text-muted">Активные фильтры:</span>
+                    {% if current_filters.search %}
+                        <span class="badge bg-secondary">Поиск: {{ current_filters.search }}</span>
+                    {% endif %}
+                    {% if current_filters.min_price %}
+                        <span class="badge bg-secondary">От {{ current_filters.min_price }} ₽</span>
+                    {% endif %}
+                    {% if current_filters.max_price %}
+                        <span class="badge bg-secondary">До {{ current_filters.max_price }} ₽</span>
+                    {% endif %}
+                    <a href="{% url 'services:list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Сбросить
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Категории -->
+    {% if categories %}
+        <div class="mb-4">
+            <a href="{% url 'services:list' %}" class="btn btn-outline-primary btn-sm me-2">Все</a>
+            {% for category in categories %}
+                <a href="{% url 'services:category' category.slug %}"
+                   class="btn btn-outline-primary btn-sm me-2">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Услуги -->
+    <div class="row">
+        {% for service in services %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <span class="badge bg-info mb-2">{{ service.category.name }}</span>
+                        <h5 class="card-title">{{ service.name }}</h5>
+                        <p class="card-text">{{ service.short_description }}</p>
+                        <p class="text-primary fw-bold">{{ service.price }} ₽</p>
+                        <a href="{% url 'services:detail' service.slug %}" class="btn btn-outline-primary">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> По вашему запросу ничего не найдено.
+                    <a href="{% url 'services:list' %}">Показать все услуги</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Назад
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Вперёд
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

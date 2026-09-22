@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Детали записи{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1>Детали записи</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Врач:</strong> {{ appointment.doctor.full_name }}</p>
+            <p><strong>Специализация:</strong> {{ appointment.doctor.specialization }}</p>
+            <p><strong>Услуга:</strong> {{ appointment.service.name|default:"—" }}</p>
+            <p><strong>Дата:</strong> {{ appointment.date|date:"d.m.Y" }}</p>
+            <p><strong>Время:</strong> {{ appointment.time|time:"H:i" }}</p>
+            <p><strong>Статус:</strong> {{ appointment.get_status_display }}</p>
+            <p><strong>Комментарий:</strong> {{ appointment.comment|default:"—" }}</p>
+        </div>
+    </div>
+    
+    <a href="{% url 'appointments:my' %}" class="btn btn-secondary mt-3">Назад</a>
+    <a href="{% url 'appointments:delete' appointment.pk %}" class="btn btn-danger mt-3">Отменить запись</a>
+</div>
+{% endblock %}

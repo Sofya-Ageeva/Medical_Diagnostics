@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ doctor.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            {% if doctor.photo %}
+                <img src="{{ doctor.photo.url }}" class="img-fluid rounded" alt="{{ doctor.full_name }}">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1>{{ doctor.full_name }}</h1>
+            <p class="lead">{{ doctor.specialization }}</p>
+            <p><strong>Опыт работы:</strong> {{ doctor.experience }} лет</p>
+            
+            <h3>Образование</h3>
+            <p>{{ doctor.education }}</p>
+            
+            <h3>Биография</h3>
+            <p>{{ doctor.bio }}</p>
+            
+            <a href="{% url 'appointments:create' %}" class="btn btn-primary">
+                Записаться на приём
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
