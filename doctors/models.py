@@ -19,13 +19,64 @@ def transliterate(text):
     return ''.join(result)
 
 
+class DoctorSchedule(models.Model):
+    """Рабочий график врача"""
+
+    class Weekday(models.IntegerChoices):
+        MONDAY = 0, 'Понедельник'
+        TUESDAY = 1, 'Вторник'
+        WEDNESDAY = 2, 'Среда'
+        THURSDAY = 3, 'Четверг'
+        FRIDAY = 4, 'Пятница'
+        SATURDAY = 5, 'Суббота'
+        SUNDAY = 6, 'Воскресенье'
+
+    doctor = models.ForeignKey(
+        'Doctor',
+        on_delete=models.CASCADE,
+        related_name='schedules',
+        verbose_name='Врач'
+    )
+    weekday = models.IntegerField(
+        choices=Weekday.choices,
+        verbose_name='День недели'
+    )
+    start_time = models.TimeField(verbose_name='Начало приёма')
+    end_time = models.TimeField(verbose_name='Конец приёма')
+    break_start = models.TimeField(
+        null=True, blank=True,
+        verbose_name='Начало перерыва'
+    )
+    break_end = models.TimeField(
+        null=True, blank=True,
+        verbose_name='Конец перерыва'
+    )
+    slot_duration = models.IntegerField(
+        default=30,
+        verbose_name='Длительность слота (мин)'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Активен'
+    )
+
+    class Meta:
+        verbose_name = 'Рабочий график'
+        verbose_name_plural = 'Рабочие графики'
+        unique_together = ['doctor', 'weekday']
+        ordering = ['doctor', 'weekday']
+
+    def __str__(self):
+        return f"{self.doctor.full_name} — {self.get_weekday_display()}"
+
+
 class Specialization(models.Model):
     """Специализация врача"""
     name = models.CharField(max_length=100, verbose_name='Название')
     slug = models.SlugField(
         unique=True,
         blank=True,
-        null=True,        # ✅ Добавлено — позволяет NULL для существующих записей
+        null=True,
         verbose_name='URL-идентификатор'
     )
     description = models.TextField(blank=True, verbose_name='Описание')
