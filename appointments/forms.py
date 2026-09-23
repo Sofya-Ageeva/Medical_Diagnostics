@@ -31,6 +31,7 @@ class AppointmentForm(forms.ModelForm):
         self.fields['service'].queryset = Service.objects.filter(is_active=True)
         self.fields['service'].required = False
         self.fields['date'].required = True
+        self.fields['time_slot'].queryset = TimeSlot.objects.filter(is_available=True)
 
     def clean(self):
         cleaned_data = super().clean()

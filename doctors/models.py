@@ -90,7 +90,7 @@ class Specialization(models.Model):
     def save(self, *args, **kwargs):
         """Автогенерация slug из name"""
         if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
+            self.slug = slugify(transliterate(self.name))
         super().save(*args, **kwargs)
 
     def __str__(self):

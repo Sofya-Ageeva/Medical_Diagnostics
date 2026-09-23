@@ -7,6 +7,7 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, verbose_name='Телефон')
     birth_date = models.DateField(null=True, blank=True, verbose_name='Дата рождения')
     address = models.CharField(max_length=255, blank=True, verbose_name='Адрес')
+    email = models.EmailField(unique=True, verbose_name='Email')
 
     class Meta:
         verbose_name = 'Пользователь'
