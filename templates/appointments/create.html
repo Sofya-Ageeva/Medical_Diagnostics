@@ -7,13 +7,145 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <h1 class="mb-4">Запись на приём</h1>
-            <form method="post">
+
+            <form method="post" id="appointment-form">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Записаться</button>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Врач -->
+                <div class="mb-3">
+                    <label for="id_doctor" class="form-label">Врач</label>
+                    <select name="doctor" id="id_doctor" class="form-select" required>
+                        <option value="">Выберите врача</option>
+                        {% for doctor in form.fields.doctor.queryset %}
+                            <option value="{{ doctor.pk }}">
+                                {{ doctor.full_name }} ({{ doctor.specialization.name }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Услуга -->
+                <div class="mb-3">
+                    <label for="id_service" class="form-label">Услуга (опционально)</label>
+                    <select name="service" id="id_service" class="form-select">
+                        <option value="">Выберите услугу</option>
+                        {% for service in form.fields.service.queryset %}
+                            <option value="{{ service.pk }}">
+                                {{ service.name }} — {{ service.price }} ₽
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Дата -->
+                <div class="mb-3">
+                    <label for="id_date" class="form-label">Дата</label>
+                    <input type="date"
+                           name="date"
+                           id="id_date"
+                           class="form-control"
+                           min="{{ today|date:'Y-m-d' }}"
+                           required>
+                </div>
+
+                <!-- Время -->
+                <div class="mb-3">
+                    <label class="form-label">Время</label>
+                    <div id="time-slots" class="d-flex flex-wrap gap-2">
+                        <p class="text-muted">Выберите врача и дату, чтобы увидеть доступное время</p>
+                    </div>
+                    {{ form.time_slot }}
+                </div>
+
+                <!-- Комментарий -->
+                <div class="mb-3">
+                    <label for="id_comment" class="form-label">Комментарий</label>
+                    <textarea name="comment"
+                              id="id_comment"
+                              class="form-control"
+                              rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                    Записаться
+                </button>
                 <a href="{% url 'appointments:my' %}" class="btn btn-secondary">Мои записи</a>
             </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const doctorSelect = document.getElementById('id_doctor');
+    const dateInput = document.getElementById('id_date');
+    const timeSlotsDiv = document.getElementById('time-slots');
+    const timeSlotHidden = document.getElementById('id_time_slot');
+    const submitBtn = document.getElementById('submit-btn');
+
+    async function loadSlots() {
+        const doctor = doctorSelect.value;
+        const date = dateInput.value;
+
+        if (!doctor || !date) {
+            timeSlotsDiv.innerHTML = '<p class="text-muted">Выберите врача и дату</p>';
+            return;
+        }
+
+        timeSlotsDiv.innerHTML = '<p class="text-muted">Загрузка...</p>';
+        submitBtn.disabled = true;
+        timeSlotHidden.value = '';
+
+        try {
+            const response = await fetch(`/appointments/api/available-slots/?doctor=${doctor}&date=${date}`);
+            const data = await response.json();
+
+            if (data.error) {
+                timeSlotsDiv.innerHTML = `<p class="text-danger">${data.error}</p>`;
+                return;
+            }
+
+            if (data.slots.length === 0) {
+                timeSlotsDiv.innerHTML = '<p class="text-warning">Нет доступного времени на эту дату</p>';
+                return;
+            }
+
+            timeSlotsDiv.innerHTML = '';
+            data.slots.forEach(slot => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-primary';
+                btn.textContent = slot.time;
+                btn.onclick = () => {
+                    timeSlotsDiv.querySelectorAll('button').forEach(b => {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-outline-primary');
+                    });
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-primary');
+                    timeSlotHidden.value = slot.id;
+                    submitBtn.disabled = false;
+                };
+                timeSlotsDiv.appendChild(btn);
+            });
+        } catch (error) {
+            timeSlotsDiv.innerHTML = '<p class="text-danger">Ошибка загрузки</p>';
+            console.error(error);
+        }
+    }
+
+    doctorSelect.addEventListener('change', loadSlots);
+    dateInput.addEventListener('change', loadSlots);
+});
+</script>
 {% endblock %}

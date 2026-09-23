@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
+from django.utils import timezone
+
 
 TRANSLIT = {
     'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
@@ -124,3 +126,46 @@ class Doctor(models.Model):
     @property
     def full_name(self):
         return f"{self.last_name} {self.first_name} {self.middle_name}".strip()
+
+
+class TimeSlot(models.Model):
+    """Доступное время для записи (создаёт администратор)"""
+
+    doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.CASCADE,
+        related_name='time_slots',
+        verbose_name='Врач'
+    )
+    date = models.DateField(verbose_name='Дата')
+    time = models.TimeField(verbose_name='Время')
+    is_available = models.BooleanField(
+        default=True,
+        verbose_name='Доступно для записи'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Создано'
+    )
+
+    class Meta:
+        verbose_name = 'Доступное время'
+        verbose_name_plural = 'Доступное время'
+        unique_together = ['doctor', 'date', 'time']
+        ordering = ['date', 'time']
+        indexes = [
+            models.Index(fields=['doctor', 'date', 'is_available']),
+        ]
+
+    def __str__(self):
+        return f"{self.doctor.full_name} — {self.date} {self.time}"
+
+    def is_booked(self):
+        """Проверка, занят ли слот"""
+        from appointments.models import Appointment
+        return Appointment.objects.filter(
+            doctor=self.doctor,
+            date=self.date,
+            time=self.time,
+            status__in=['pending', 'confirmed']
+        ).exists()
