@@ -124,4 +124,3 @@ class ProfileViewTest(TestCase):
 
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, 'Обновленное')
-        

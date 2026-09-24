@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Appointment, ContactRequest
+from .models import Appointment, ContactRequest, DiagnosticResult
 
 
 @admin.register(Appointment)
@@ -19,3 +19,10 @@ class ContactRequestAdmin(admin.ModelAdmin):
     list_editable = ['is_processed']
     readonly_fields = ['name', 'email', 'phone', 'message', 'created_at']
 
+
+@admin.register(DiagnosticResult)
+class DiagnosticResultAdmin(admin.ModelAdmin):
+    list_display = ['appointment', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['appointment__user__email', 'conclusion']
+    date_hierarchy = 'created_at'

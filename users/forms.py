@@ -20,9 +20,20 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    """Форма редактирования профиля"""
+
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'phone', 'birth_date', 'address']
+        fields = [
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+            'birth_date',
+            'address',
+            'city',  # ✅ Добавлено
+            'avatar',  # ✅ Добавлено
+        ]
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -30,4 +41,6 @@ class UserProfileForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'birth_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'avatar': forms.FileInput(attrs={'class': 'form-control'}),
         }

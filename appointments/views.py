@@ -5,13 +5,11 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.views import View
-from django.shortcuts import get_object_or_404
 from .models import Appointment
 from .forms import AppointmentForm
 from datetime import datetime
-from doctors.models import Doctor, TimeSlot
+from doctors.models import TimeSlot
 from django.utils import timezone
-
 
 
 class MyAppointmentsView(LoginRequiredMixin, ListView):
@@ -24,7 +22,9 @@ class MyAppointmentsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = Appointment.objects.filter(
             user=self.request.user
-        ).select_related('doctor', 'service', 'doctor__specialization')
+        ).select_related(
+            'doctor', 'service', 'doctor__specialization'
+        ).prefetch_related('result')
 
         # Фильтр по статусу
         status = self.request.GET.get('status')
@@ -90,7 +90,9 @@ class AppointmentDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'appointment'
 
     def get_queryset(self):
-        return Appointment.objects.filter(user=self.request.user)
+        return Appointment.objects.filter(
+            user=self.request.user
+        ).select_related('doctor', 'service').prefetch_related('result')
 
 
 class AppointmentDeleteView(LoginRequiredMixin, DeleteView):

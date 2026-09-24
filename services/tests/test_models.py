@@ -50,4 +50,3 @@ class ServiceModelTest(TestCase):
     def test_service_category_relation(self):
         self.assertEqual(self.service.category, self.category)
         self.assertIn(self.service, self.category.services.all())
-        

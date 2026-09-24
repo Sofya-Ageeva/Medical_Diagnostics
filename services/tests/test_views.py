@@ -98,4 +98,3 @@ class ServiceDetailViewTest(TestCase):
         url = reverse('services:detail', kwargs={'slug': 'unknown'})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
-        

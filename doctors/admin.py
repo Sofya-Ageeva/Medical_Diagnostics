@@ -4,7 +4,6 @@ from .models import Doctor, Specialization, DoctorSchedule, TimeSlot
 from django.utils import timezone
 
 
-
 @admin.register(Specialization)
 class SpecializationAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug']
@@ -131,3 +130,40 @@ class TimeSlotAdmin(admin.ModelAdmin):
                     current += timedelta(minutes=schedule.slot_duration)
 
         self.message_user(request, f'✅ Создано {created_count} слотов')
+
+
+@admin.register(DoctorSchedule)
+class DoctorScheduleAdmin(admin.ModelAdmin):
+    """Админка для графика работы врачей"""
+
+    list_display = [
+        'doctor', 'weekday_display', 'start_time', 'end_time',
+        'break_start', 'break_end', 'slot_duration', 'is_active'
+    ]
+    list_filter = ['weekday', 'is_active', 'doctor']
+    search_fields = ['doctor__last_name', 'doctor__first_name']
+    list_editable = ['is_active']
+
+    fieldsets = (
+        (None, {
+            'fields': ('doctor', 'weekday', 'is_active')
+        }),
+        ('Рабочие часы', {
+            'fields': ('start_time', 'end_time'),
+            'description': 'Время начала и окончания приёма'
+        }),
+        ('Перерыв', {
+            'fields': ('break_start', 'break_end'),
+            'description': 'Оставьте пустым, если перерыва нет'
+        }),
+        ('Настройки слотов', {
+            'fields': ('slot_duration',),
+            'description': 'Длительность одного приёма в минутах'
+        }),
+    )
+
+    @admin.display(description='День недели')
+    def weekday_display(self, obj):
+        days = ['Понедельник', 'Вторник', 'Среда', 'Четверг',
+                'Пятница', 'Суббота', 'Воскресенье']
+        return days[obj.weekday] if obj.weekday < len(days) else obj.weekday

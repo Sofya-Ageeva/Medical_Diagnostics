@@ -60,4 +60,3 @@ class AppointmentFormTest(TestCase):
             # time_slot не указан
         })
         self.assertFalse(form.is_valid())
-        
