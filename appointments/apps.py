@@ -7,4 +7,4 @@ class AppointmentsConfig(AppConfig):
 
     def ready(self):
         """Подключаем сигналы"""
-        import appointments.signals
+        import appointments.signals  # noqa: F401

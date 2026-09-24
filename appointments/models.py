@@ -45,7 +45,6 @@ class Appointment(models.Model):
         verbose_name='Напоминание отправлено'
     )
 
-
     class Meta:
         verbose_name = 'Запись на прием'
         verbose_name_plural = 'Записи на прием'
@@ -72,3 +71,38 @@ class ContactRequest(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.email}"
+
+
+class DiagnosticResult(models.Model):
+    """Результаты диагностики по записи"""
+
+    appointment = models.OneToOneField(
+        Appointment,
+        on_delete=models.CASCADE,
+        related_name='result',
+        verbose_name='Запись на приём'
+    )
+    description = models.TextField(
+        verbose_name='Описание исследования'
+    )
+    conclusion = models.TextField(
+        verbose_name='Заключение'
+    )
+    file = models.FileField(
+        upload_to='results/',
+        blank=True,
+        null=True,
+        verbose_name='Файл результата (PDF)'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Создан'
+    )
+
+    class Meta:
+        verbose_name = 'Результат диагностики'
+        verbose_name_plural = 'Результаты диагностики'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Результат от {self.created_at:%d.%m.%Y} — {self.appointment}'

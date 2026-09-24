@@ -15,4 +15,3 @@ class ServiceAdmin(admin.ModelAdmin):
     search_fields = ['name', 'short_description']
     prepopulated_fields = {'slug': ('name',)}
     list_editable = ['is_active', 'price']
-

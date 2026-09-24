@@ -96,6 +96,11 @@
                                 <span class="badge bg-{% if appointment.status == 'confirmed' %}success{% elif appointment.status == 'pending' %}warning{% elif appointment.status == 'completed' %}info{% else %}secondary{% endif %}">
                                     {{ appointment.get_status_display }}
                                 </span>
+                                {% if appointment.result %}
+                                    <span class="badge bg-success" title="Результат готов">
+                                        <i class="bi bi-file-medical"></i> Результат
+                                    </span>
+                                {% endif %}
                             </td>
                             <td>
                                 <a href="{% url 'appointments:detail' appointment.pk %}" class="btn btn-sm btn-outline-primary">

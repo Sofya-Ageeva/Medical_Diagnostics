@@ -3,8 +3,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db import IntegrityError
+from django.http import JsonResponse
+from django.views import View
 from .models import Appointment
 from .forms import AppointmentForm
+from datetime import datetime
+from doctors.models import TimeSlot
+from django.utils import timezone
 
 
 class MyAppointmentsView(LoginRequiredMixin, ListView):
@@ -17,7 +22,9 @@ class MyAppointmentsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = Appointment.objects.filter(
             user=self.request.user
-        ).select_related('doctor', 'service', 'doctor__specialization')
+        ).select_related(
+            'doctor', 'service', 'doctor__specialization'
+        ).prefetch_related('result')
 
         # Фильтр по статусу
         status = self.request.GET.get('status')
@@ -83,7 +90,9 @@ class AppointmentDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'appointment'
 
     def get_queryset(self):
-        return Appointment.objects.filter(user=self.request.user)
+        return Appointment.objects.filter(
+            user=self.request.user
+        ).select_related('doctor', 'service').prefetch_related('result')
 
 
 class AppointmentDeleteView(LoginRequiredMixin, DeleteView):
@@ -98,3 +107,53 @@ class AppointmentDeleteView(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Запись отменена')
         return super().form_valid(form)
+
+
+class AvailableSlotsView(View):
+    """AJAX-эндпоинт для получения доступных слотов"""
+
+    def get(self, request):
+        doctor_id = request.GET.get('doctor')
+        date_str = request.GET.get('date')
+
+        if not doctor_id or not date_str:
+            return JsonResponse({
+                'error': 'Параметры doctor и date обязательны'
+            }, status=400)
+
+        try:
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse({
+                'error': 'Неверный формат даты. Используйте YYYY-MM-DD'
+            }, status=400)
+
+        # ✅ Проверка: дата не в прошлом
+        today = timezone.now().date()
+        if date_obj < today:
+            return JsonResponse({
+                'slots': [],
+                'count': 0,
+                'error': 'Нельзя выбрать прошедшую дату'
+            })
+
+        # ✅ Ищем слоты, созданные администратором
+        slots = TimeSlot.objects.filter(
+            doctor_id=doctor_id,
+            date=date_obj,
+            is_available=True,
+        ).order_by('time')
+
+        # ✅ Исключаем занятые
+        result = []
+        for slot in slots:
+            if not slot.is_booked():
+                result.append({
+                    'id': slot.id,
+                    'time': slot.time.strftime('%H:%M'),
+                })
+
+        return JsonResponse({
+            'slots': result,
+            'count': len(result),
+        })

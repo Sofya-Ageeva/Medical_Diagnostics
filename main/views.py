@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.contrib import messages
-from django.views.generic import TemplateView, ListView, CreateView
+from django.views.generic import TemplateView
 from .models import CompanyInfo, Advantage
 from services.models import Service
 from appointments.models import ContactRequest
