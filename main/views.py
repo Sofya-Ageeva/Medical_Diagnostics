@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 from .models import CompanyInfo, Advantage
 from services.models import Service
 from appointments.models import ContactRequest
+from doctors.models import Doctor
 
 
 class HomeView(TemplateView):
@@ -25,6 +26,9 @@ class AboutView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['company'] = CompanyInfo.objects.first()
+        context['doctors'] = Doctor.objects.filter(
+            is_active=True
+        ).select_related('specialization')
         return context
 
 
