@@ -51,3 +51,11 @@ class UserModelTest(TestCase):
                 email='test@example.com',  # Дубликат
                 password='test123456',
             )
+
+    def test_get_full_name(self):
+        user = User.objects.create_user(
+            username='test_user',
+            email='test@test.ru', password='pass',
+            first_name='Иван', last_name='Иванов'
+        )
+        self.assertEqual(user.get_full_name(), 'Иван Иванов')

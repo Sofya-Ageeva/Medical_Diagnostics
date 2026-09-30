@@ -184,6 +184,7 @@ docker compose exec web python manage.py createsuperuser
 ---
 
 ## 🧪 Тестирование
+Покрытие тестами осуществлено на 89 %
 
 ### Запуск тестов
 
